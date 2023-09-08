@@ -19,6 +19,8 @@ public class RobotContainer {
 
   private final CommandJoystick driver;
 
+  private boolean isFieldOriented = false;
+
   public RobotContainer() {
     swerve = new Swerve();
 
@@ -30,7 +32,8 @@ public class RobotContainer {
     //   () -> -driver.getRawAxis(Constants.IO.driveXAxis),
     //   () -> driver.getRawAxis(Constants.IO.driveYAxis),
     //   () -> driver.getRawAxis(Constants.IO.driveOmegaAxis),
-    //   () -> driver.button(Constants.IO.robotOrientedButton).getAsBoolean(),
+    //   // () -> driver.button(Constants.IO.robotOrientedButton).getAsBoolean(),
+    //   () -> isFieldOriented,
     //   swerve
     //   )
     // );
@@ -41,6 +44,9 @@ public class RobotContainer {
 
   private void configureBindings() {
     driver.button(1).onTrue(new InstantCommand(swerve::resetGyro));
+    driver.button(2).onTrue(new InstantCommand(swerve::resetEncoders));
+    driver.button(5).onTrue(new InstantCommand(() -> isFieldOriented = true));
+    driver.button(7).onTrue(new InstantCommand(() -> isFieldOriented = false));
   }
 
   public Command getAutonomousCommand() {

@@ -35,39 +35,42 @@ public class SwerveModule {
     private final int[] turnMotorIDs       = {11, 21, 31, 41};
     private final int[] absoluteEncoderIDs = {12, 22, 32, 42};
 
-
-
-
     // 0 : frontLeft, 1 : frontRight, 2 : backLeft, 3 : backRight
     public SwerveModule(int moduleID) {
 
         this.moduleID = moduleID;
 
+        System.out.println("Module " + moduleID);
         driveMotor = new CANSparkMax(driveMotorIDs[moduleID], MotorType.kBrushless);
-        driveMotor.restoreFactoryDefaults();
-        driveMotor.clearFaults();
+        System.out.println(driveMotor.restoreFactoryDefaults().name());
+        System.out.println(driveMotor.clearFaults().name());
         driveMotor.setInverted(isDriveInverted[moduleID]);
-        driveMotor.setIdleMode(IdleMode.kBrake);
-        driveMotor.burnFlash();
+        System.out.println(driveMotor.setIdleMode(IdleMode.kCoast).name());
+        System.out.println(driveMotor.burnFlash().name());
+        System.out.println("Module " + moduleID + " drive motor configured");
 
         turnMotor = new CANSparkMax(turnMotorIDs[moduleID], MotorType.kBrushless);
-        turnMotor.restoreFactoryDefaults();
-        turnMotor.clearFaults();
+        System.out.println(turnMotor.restoreFactoryDefaults().name());
+        System.out.println(turnMotor.clearFaults().name());
         turnMotor.setInverted(isTurnInverted[moduleID]);
-        turnMotor.setIdleMode(IdleMode.kBrake);
-        turnMotor.burnFlash();
+        System.out.println(turnMotor.setIdleMode(IdleMode.kCoast).name());
+        System.out.println(turnMotor.burnFlash().name());
+        System.out.println("Module " + moduleID + " turn motor configured");
 
         absoluteEncoder = new CANCoder(absoluteEncoderIDs[moduleID]);
         // absoluteEncoder.configMagnetOffset(absoluteEncoder.configGetMagnetOffset() - (90 * moduleID));
         // absoluteEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
+        System.out.println("Module " + moduleID + " absolute encoder configured");
 
         driveEncoder = driveMotor.getEncoder();
         driveEncoder.setPositionConversionFactor(Constants.Swerve.Module.driveRotationsToMeters);
         driveEncoder.setVelocityConversionFactor(Constants.Swerve.Module.driveRPMToMetersPerSecond);
+        System.out.println("Module " + moduleID + " drive encoder configured");
 
         turnEncoder = turnMotor.getEncoder();
         turnEncoder.setPositionConversionFactor(Constants.Swerve.Module.turnRotationsToRadians);
         turnEncoder.setVelocityConversionFactor(Constants.Swerve.Module.turnRPMToRadiansPerSecond);      
+        System.out.println("Module " + moduleID + " turn encoder configured");
 
         // driveController = driveMotor.getPIDController();
         // driveController.setFeedbackDevice(driveEncoder);
@@ -114,11 +117,12 @@ public class SwerveModule {
 
     public void resetEncoders() {
         driveEncoder.setPosition(0);
-        turnEncoder.setPosition(getAbsoluteEncoderPositionRadians());
+        turnEncoder.setPosition(getAbsoluteEncoderPositionRadians() - (moduleID - 1) * 0.5 * Math.PI);
     }
 
     public SwerveModuleState getState() {
         return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getTurnPosition()));
+        // return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getAbsoluteEncoderPositionRadians()));
     }
 
     public void setDesiredState(SwerveModuleState state) {
@@ -129,12 +133,16 @@ public class SwerveModule {
         state = SwerveModuleState.optimize(state, getState().angle);
         // driveController.setReference(state.speedMetersPerSecond, ControlType.kVelocity);
         // turnController.setReference(state.angle.getRadians(), ControlType.kPosition);
-        SmartDashboard.putString("Module [" + moduleID + "] state", state.toString());
+        SmartDashboard.putString("Module [" + moduleID + "] desired state", state.toString());
     }
 
     public void stop() {
         // driveController.setReference(0, ControlType.kVelocity);
         // turnController.setReference(getTurnPosition(), ControlType.kPosition);
+    }
+
+    public double getModuleID() {
+        return moduleID;
     }
 
     //TESTING

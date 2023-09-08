@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Swerve;
 import frc.robot.utils.Constants;
@@ -54,6 +55,8 @@ public class SwerveJoystick extends CommandBase{
         SwerveModuleState[] states = Constants.Swerve.swerveKinematics.toSwerveModuleStates(chassisSpeeds);
 
         swerve.setModuleStates(states);
+
+        SmartDashboard.putString("Chassis Speeds", chassisSpeeds.toString());
     }
 
     @Override
