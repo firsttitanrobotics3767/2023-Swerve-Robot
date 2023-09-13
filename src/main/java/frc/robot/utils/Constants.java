@@ -19,7 +19,7 @@ public class Constants {
 
     public static final class Swerve {
 
-        public static final double maxSpeedMetersPerSecond = Units.feetToMeters(16); //4.8768m
+        public static final double maxSpeedMetersPerSecond = 5.15; //4.8768m
         public static final double maxTurnSpeedRadsPerSecond = 13.0857; // 4.8768 / (0.745363m * pi) * 2 * pi
         public static final double throttleLimitedMaxStrafeSpeed = maxSpeedMetersPerSecond * IO.strafeThrottleLimiter;
         public static final double throttleLimitedMaxTurnSpeed = maxTurnSpeedRadsPerSecond * IO.turnThrottleLimiter;

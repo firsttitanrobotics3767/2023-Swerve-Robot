@@ -45,8 +45,10 @@ public class Swerve extends SubsystemBase{
         SmartDashboard.putNumber("Heading", getHeading());
         for (SwerveModule module : modules) {
             SmartDashboard.putString("Module [" + module.getModuleID() + "] actual state",
-            String.format("Speed: %.2f m/s, Angle: %s", module.getDriveVelocity(), Units.radiansToDegrees(module.getTurnPosition())));
+                String.format("Speed: %.2f m/s, Angle speed: %.2f", module.getDriveVelocity(), module.getTurnVelocity()));
+                // String.format("Speed: %.2f m/s, Angle: %.2f", module.getDriveVelocity(), module.getState().angle.getDegrees()));
         }
+        SmartDashboard.putNumber("Module 0 drive velocity", modules.get(0).getState().speedMetersPerSecond);
     }
 
     public void resetGyro() {
@@ -75,7 +77,6 @@ public class Swerve extends SubsystemBase{
 
     public void setModuleStates(SwerveModuleState[] desiredStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeedMetersPerSecond);
-        modules.forEach((module) -> module.setDesiredState(desiredStates[modules.indexOf(module)]));
         for (SwerveModule module : modules) {
             module.setDesiredState(desiredStates[modules.indexOf(module)]);
         }

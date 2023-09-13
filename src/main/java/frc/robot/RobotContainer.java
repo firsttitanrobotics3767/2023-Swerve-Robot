@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,9 +15,10 @@ public class RobotContainer {
 
   private final CommandJoystick driver;
 
-  private boolean isFieldOriented = false;
+  private boolean fieldOriented = false;
 
   public RobotContainer() {
+  
     swerve = new Swerve();
 
     driver = new CommandJoystick(Constants.IO.driverPort);
@@ -29,11 +26,10 @@ public class RobotContainer {
     configureBindings();
 
     // swerve.setDefaultCommand(new SwerveJoystick(
-    //   () -> -driver.getRawAxis(Constants.IO.driveXAxis),
-    //   () -> driver.getRawAxis(Constants.IO.driveYAxis),
-    //   () -> driver.getRawAxis(Constants.IO.driveOmegaAxis),
-    //   // () -> driver.button(Constants.IO.robotOrientedButton).getAsBoolean(),
-    //   () -> isFieldOriented,
+    //   -driver::getRawAxis(Constants.IO.driveXAxis),
+    //   driver::getRawAxis(Constants.IO.driveYAxis),
+    //   driver::getRawAxis(Constants.IO.driveOmegaAxis),
+    //   this::isFieldOriented,
     //   swerve
     //   )
     // );
@@ -45,11 +41,15 @@ public class RobotContainer {
   private void configureBindings() {
     driver.button(1).onTrue(new InstantCommand(swerve::resetGyro));
     driver.button(2).onTrue(new InstantCommand(swerve::resetEncoders));
-    driver.button(5).onTrue(new InstantCommand(() -> isFieldOriented = true));
-    driver.button(7).onTrue(new InstantCommand(() -> isFieldOriented = false));
+    driver.button(5).onTrue(new InstantCommand(() -> fieldOriented = true));
+    driver.button(7).onTrue(new InstantCommand(() -> fieldOriented = false));
   }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
+  }
+
+  public boolean isFieldOriented() {
+    return fieldOriented;
   }
 }

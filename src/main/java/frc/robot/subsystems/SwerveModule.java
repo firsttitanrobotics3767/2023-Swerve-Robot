@@ -7,6 +7,7 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -28,7 +29,7 @@ public class SwerveModule {
     private final RelativeEncoder driveEncoder;
     private final RelativeEncoder turnEncoder;
     
-    // private final SparkMaxPIDController driveController;
+    private final SparkMaxPIDController driveController;
     // private final SparkMaxPIDController turnController;
 
     private final int[] driveMotorIDs      = {1, 2, 3, 4}; 
@@ -40,28 +41,25 @@ public class SwerveModule {
 
         this.moduleID = moduleID;
 
-        System.out.println("Module " + moduleID);
         driveMotor = new CANSparkMax(driveMotorIDs[moduleID], MotorType.kBrushless);
-        System.out.println(driveMotor.restoreFactoryDefaults().name());
-        System.out.println(driveMotor.clearFaults().name());
+        driveMotor.restoreFactoryDefaults();
+        driveMotor.clearFaults();
         driveMotor.setInverted(isDriveInverted[moduleID]);
-        System.out.println(driveMotor.setIdleMode(IdleMode.kCoast).name());
-        System.out.println(driveMotor.burnFlash().name());
+        driveMotor.setIdleMode(IdleMode.kCoast);
+        driveMotor.burnFlash();
         System.out.println("Module " + moduleID + " drive motor configured");
 
         turnMotor = new CANSparkMax(turnMotorIDs[moduleID], MotorType.kBrushless);
-        System.out.println(turnMotor.restoreFactoryDefaults().name());
-        System.out.println(turnMotor.clearFaults().name());
+        turnMotor.restoreFactoryDefaults();
+        turnMotor.clearFaults();
         turnMotor.setInverted(isTurnInverted[moduleID]);
-        System.out.println(turnMotor.setIdleMode(IdleMode.kCoast).name());
-        System.out.println(turnMotor.burnFlash().name());
+        turnMotor.setIdleMode(IdleMode.kCoast);
+        turnMotor.burnFlash();
         System.out.println("Module " + moduleID + " turn motor configured");
 
         absoluteEncoder = new CANCoder(absoluteEncoderIDs[moduleID]);
-        // absoluteEncoder.configMagnetOffset(absoluteEncoder.configGetMagnetOffset() - (90 * moduleID));
-        // absoluteEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
-        System.out.println("Module " + moduleID + " absolute encoder configured");
 
+        try {Thread.sleep(200);} catch (Exception e) {}
         driveEncoder = driveMotor.getEncoder();
         driveEncoder.setPositionConversionFactor(Constants.Swerve.Module.driveRotationsToMeters);
         driveEncoder.setVelocityConversionFactor(Constants.Swerve.Module.driveRPMToMetersPerSecond);
@@ -69,16 +67,15 @@ public class SwerveModule {
 
         turnEncoder = turnMotor.getEncoder();
         turnEncoder.setPositionConversionFactor(Constants.Swerve.Module.turnRotationsToRadians);
-        turnEncoder.setVelocityConversionFactor(Constants.Swerve.Module.turnRPMToRadiansPerSecond);      
+        turnEncoder.setVelocityConversionFactor(Constants.Swerve.Module.turnRPMToRadiansPerSecond);
         System.out.println("Module " + moduleID + " turn encoder configured");
 
-        // driveController = driveMotor.getPIDController();
-        // driveController.setFeedbackDevice(driveEncoder);
-        // driveController.setP(0.0020645);
-        // driveController.setI(0);
-        // driveController.setD(0);
-        // driveController.setFF(0);
-        // driveController.setIZone(0);
+        driveController = driveMotor.getPIDController();
+        driveController.setP(0.06);
+        driveController.setI(0);
+        driveController.setD(0);
+        driveController.setFF(0.195);
+        driveController.setIZone(0);
 
         // turnController = turnMotor.getPIDController();
         // turnController.setFeedbackDevice(turnEncoder);
@@ -117,12 +114,11 @@ public class SwerveModule {
 
     public void resetEncoders() {
         driveEncoder.setPosition(0);
-        turnEncoder.setPosition(getAbsoluteEncoderPositionRadians() - (moduleID - 1) * 0.5 * Math.PI);
+        turnEncoder.setPosition(getAbsoluteEncoderPositionRadians() - moduleID * 0.5 * Math.PI);
     }
 
     public SwerveModuleState getState() {
         return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getTurnPosition()));
-        // return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getAbsoluteEncoderPositionRadians()));
     }
 
     public void setDesiredState(SwerveModuleState state) {
@@ -147,7 +143,11 @@ public class SwerveModule {
 
     //TESTING
     public void setDriveSpeed(double speed) {
-        driveMotor.set(speed);
+        // driveMotor.set(speed);
+        speed = speed * Constants.Swerve.maxSpeedMetersPerSecond;
+        driveController.setReference(speed, ControlType.kVelocity);
+        SmartDashboard.putNumber("Drive speed setpoint", speed);
+
     }
 
     public void setTurnSpeed(double speed) {
