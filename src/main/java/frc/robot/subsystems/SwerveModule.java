@@ -30,7 +30,7 @@ public class SwerveModule {
     private final RelativeEncoder turnEncoder;
     
     private final SparkMaxPIDController driveController;
-    // private final SparkMaxPIDController turnController;
+    private final SparkMaxPIDController turnController;
 
     private final int[] driveMotorIDs      = {1, 2, 3, 4}; 
     private final int[] turnMotorIDs       = {11, 21, 31, 41};
@@ -77,16 +77,12 @@ public class SwerveModule {
         driveController.setFF(0.195);
         driveController.setIZone(0);
 
-        // turnController = turnMotor.getPIDController();
-        // turnController.setFeedbackDevice(turnEncoder);
-        // turnController.setP(0.01);
-        // turnController.setI(0);
-        // turnController.setD(0);
-        // turnController.setFF(0);
-        // turnController.setIZone(0);
-        // turnController.setPositionPIDWrappingEnabled(true);
-        // turnController.setPositionPIDWrappingMaxInput(moduleID);
-        // turnController.setPositionPIDWrappingMinInput(moduleID);
+        turnController = turnMotor.getPIDController();
+        turnController.setP(0.5);
+        turnController.setI(0);
+        turnController.setD(0);
+        turnController.setFF(0.005);
+        turnController.setIZone(0);
 
         resetEncoders();
 
@@ -114,7 +110,7 @@ public class SwerveModule {
 
     public void resetEncoders() {
         driveEncoder.setPosition(0);
-        turnEncoder.setPosition(getAbsoluteEncoderPositionRadians() - moduleID * 0.5 * Math.PI);
+        turnEncoder.setPosition(getAbsoluteEncoderPositionRadians());
     }
 
     public SwerveModuleState getState() {
@@ -122,7 +118,7 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState state) {
-        if (state.speedMetersPerSecond < 0.001) {
+        if (state.speedMetersPerSecond < 0.05) {
             stop();
             return;
         }
@@ -145,13 +141,19 @@ public class SwerveModule {
     public void setDriveSpeed(double speed) {
         // driveMotor.set(speed);
         speed = speed * Constants.Swerve.maxSpeedMetersPerSecond;
+        if (speed < 0.05 && speed > -0.05) {
+            return;
+        }
         driveController.setReference(speed, ControlType.kVelocity);
         SmartDashboard.putNumber("Drive speed setpoint", speed);
 
     }
 
-    public void setTurnSpeed(double speed) {
-        turnMotor.set(speed);
+    public void setTurnPosition(double position) {
+        double positionDegrees = position * 180;
+        position = position * Math.PI;
+        turnController.setReference(position, ControlType.kPosition);
+        SmartDashboard.putNumber("Turn Position Setpoint", positionDegrees);
     }
     
 }

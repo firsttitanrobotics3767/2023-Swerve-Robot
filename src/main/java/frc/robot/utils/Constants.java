@@ -40,9 +40,10 @@ public class Constants {
             public static final double driveRotationsToMeters = driveGearRatio * Math.PI * wheelDiameter;
             public static final double driveRPMToMetersPerSecond = driveRotationsToMeters / 60;
             
+            public static final double maxTurningSpeedRadiansPerMinute = 1;
             public static final double turnGearRatio = 1 / 21.42857143;
             public static final double turnRotationsToRadians = turnGearRatio * Math.PI * 2;
-            public static final double turnRPMToRadiansPerSecond = turnRotationsToRadians / 60;
+            public static final double turnRPMToRadiansPerSecond = maxTurningSpeedRadiansPerMinute / 60;
 
 
         }
