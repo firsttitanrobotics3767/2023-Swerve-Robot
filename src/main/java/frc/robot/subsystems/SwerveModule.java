@@ -1,13 +1,13 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.CANCoder;
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -78,11 +78,15 @@ public class SwerveModule {
         driveController.setIZone(0);
 
         turnController = turnMotor.getPIDController();
+        // turnController.setFeedbackDevice((AbsoluteEncoder) absoluteEncoder);
         turnController.setP(0.5);
         turnController.setI(0);
         turnController.setD(0);
-        turnController.setFF(0.005);
+        // turnController.setFF(0.005);
         turnController.setIZone(0);
+        turnController.setPositionPIDWrappingEnabled(true);
+        turnController.setPositionPIDWrappingMaxInput(Math.PI);
+        turnController.setPositionPIDWrappingMinInput(-Math.PI);
 
         resetEncoders();
 
@@ -104,17 +108,22 @@ public class SwerveModule {
         return turnEncoder.getVelocity();
     }
 
-    public double getAbsoluteEncoderPositionRadians() {
-        return (absoluteEncoder.getAbsolutePosition() / 180) * Math.PI;
+    public double getAbsoluteEncoderPosition() {
+        return absoluteEncoder.getAbsolutePosition();
     }
 
     public void resetEncoders() {
         driveEncoder.setPosition(0);
-        turnEncoder.setPosition(getAbsoluteEncoderPositionRadians());
+        turnEncoder.setPosition(getAbsoluteEncoderPosition());
     }
 
     public SwerveModuleState getState() {
-        return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getTurnPosition()));
+        // return new SwerveModuleState(getDriveVelocity(), Rotation2d.fromRadians(getTurnPosition()));
+        return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getAbsoluteEncoderPosition()));
+    }
+
+    public String getStateString() {
+        return String.format("Speed: %.2f m/s, Angle: %.2f", getDriveVelocity(), getState().angle.getDegrees());
     }
 
     public void setDesiredState(SwerveModuleState state) {
@@ -122,15 +131,17 @@ public class SwerveModule {
             stop();
             return;
         }
-        state = SwerveModuleState.optimize(state, getState().angle);
-        // driveController.setReference(state.speedMetersPerSecond, ControlType.kVelocity);
-        // turnController.setReference(state.angle.getRadians(), ControlType.kPosition);
-        SmartDashboard.putString("Module [" + moduleID + "] desired state", state.toString());
+        state = SwerveModuleState.optimize(state, new Rotation2d(getAbsoluteEncoderPosition()));
+        driveController.setReference(state.speedMetersPerSecond, ControlType.kVelocity);
+        turnController.setReference(state.angle.getRadians(), ControlType.kPosition);
+        SmartDashboard.putString("Module [" + getModuleID() + "] desired state",
+            String.format("Speed: %.2f m/s, Angle: %.2f", state.speedMetersPerSecond, state.angle.getDegrees()));
+        
     }
 
     public void stop() {
-        // driveController.setReference(0, ControlType.kVelocity);
-        // turnController.setReference(getTurnPosition(), ControlType.kPosition);
+        driveController.setReference(0, ControlType.kVelocity);
+        turnController.setReference(getTurnPosition(), ControlType.kPosition);
     }
 
     public double getModuleID() {
@@ -140,7 +151,7 @@ public class SwerveModule {
     //TESTING
     public void setDriveSpeed(double speed) {
         // driveMotor.set(speed);
-        speed = speed * Constants.Swerve.maxSpeedMetersPerSecond;
+        speed = speed * Constants.Swerve.maxSpeed;
         if (speed < 0.05 && speed > -0.05) {
             return;
         }

@@ -3,7 +3,6 @@ package frc.robot.commands;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -14,19 +13,21 @@ public class SwerveJoystick extends CommandBase{
     
     private final Swerve swerve;
     private final Supplier<Double> xSpeedFunction, ySpeedFunction, omegaSpeedFunction;
-    private final Supplier<Boolean> robotOrientedFunction;
+    private final Supplier<Boolean> robotOriented, boost;
 
     public SwerveJoystick(
         Supplier<Double> xSpeedFunction,
         Supplier<Double> ySpeedFunction,
         Supplier<Double> omegaSpeedFunction,
-        Supplier<Boolean> fieldOrientedFunction,
+        Supplier<Boolean> robotOriented,
+        Supplier<Boolean> boost,
         Swerve swerve
     ) {
         this.xSpeedFunction = xSpeedFunction;
         this.ySpeedFunction = ySpeedFunction;
         this.omegaSpeedFunction = omegaSpeedFunction;
-        this.robotOrientedFunction = fieldOrientedFunction;
+        this.robotOriented = robotOriented;
+        this.boost = boost;
         this.swerve = swerve;
         addRequirements(swerve);
     }
@@ -41,18 +42,19 @@ public class SwerveJoystick extends CommandBase{
         ySpeed = Math.abs(ySpeed) > Constants.IO.deadband ? ySpeed : 0.0;
         omegaSpeed = Math.abs(omegaSpeed) > Constants.IO.deadband ? omegaSpeed : 0.0;
 
-        xSpeed = xSpeed * Constants.Swerve.throttleLimitedMaxStrafeSpeed;
-        ySpeed = ySpeed * Constants.Swerve.throttleLimitedMaxStrafeSpeed;
-        omegaSpeed = omegaSpeed * Constants.Swerve.throttleLimitedMaxTurnSpeed;
+        xSpeed = boost.get() ? xSpeed * Constants.Swerve.throttleLimitedBoostedMaxSpeed : xSpeed * Constants.Swerve.throttleLimitedMaxSpeed;
+        ySpeed = boost.get() ? ySpeed * Constants.Swerve.throttleLimitedBoostedMaxSpeed : ySpeed * Constants.Swerve.throttleLimitedMaxSpeed;
+        omegaSpeed = boost.get() ? omegaSpeed * Constants.Swerve.throttleLimitedBoostedMaxTurnSpeed : omegaSpeed * Constants.Swerve.throttleLimitedMaxTurnSpeed;
 
         ChassisSpeeds chassisSpeeds;
-        if (robotOrientedFunction.get()) {
+        if (robotOriented.get()) {
             chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, omegaSpeed);
         } else {
             chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omegaSpeed, swerve.getRotation2d());
         }
 
         SwerveModuleState[] states = Constants.Swerve.swerveKinematics.toSwerveModuleStates(chassisSpeeds);
+        
 
         swerve.setModuleStates(states);
 

@@ -5,10 +5,8 @@ import java.util.List;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -44,12 +42,8 @@ public class Swerve extends SubsystemBase{
     public void periodic() {
         SmartDashboard.putNumber("Heading", getHeading());
         for (SwerveModule module : modules) {
-            SmartDashboard.putString("Module [" + module.getModuleID() + "] actual state",
-                // String.format("Speed: %.2f m/s, Angle Speed: %.2f", module.getDriveVelocity(), module.getTurnVelocity()));
-                String.format("Speed: %.2f m/s, Angle: %.2f", module.getDriveVelocity(), module.getState().angle.getDegrees()));
+            SmartDashboard.putString("Module [" + module.getModuleID() + "] actual state", module.getStateString());
         }
-        SmartDashboard.putNumber("Module 0 drive velocity", modules.get(0).getState().speedMetersPerSecond);
-        SmartDashboard.putNumber("Module 0 Turn Position", modules.get(0).getTurnPosition());
     }
 
     public void resetGyro() {
@@ -77,7 +71,7 @@ public class Swerve extends SubsystemBase{
     }
 
     public void setModuleStates(SwerveModuleState[] desiredStates) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeedMetersPerSecond);
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
         for (SwerveModule module : modules) {
             module.setDesiredState(desiredStates[modules.indexOf(module)]);
         }
