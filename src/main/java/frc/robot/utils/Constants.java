@@ -21,6 +21,8 @@ public class Constants {
         public static final double turnThrottleLimiter = 0.6;
         public static final double boostedThrottleLimiter = 1.0;
         public static final double boostedTurnThrottleLimiter = 1.0;
+
+        public static final String cameraName = "OV5647";
     }
 
     public static final class Swerve {
