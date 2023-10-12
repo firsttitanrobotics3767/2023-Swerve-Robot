@@ -2,7 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.List;
 
-import org.photonvision.PhotonCamera;
+// import org.photonvision.PhotonCamera;
 
 import com.kauailabs.navx.frc.AHRS;
 
@@ -26,12 +26,12 @@ public class Swerve extends SubsystemBase{
     private final List<SwerveModule> modules;
 
     private final SwerveDriveOdometry odometry;
-    private Pose2d pose;
+    private Pose2d pose, correctedPose;
     private final Field2d field;
     private AprilTagFieldLayout fieldLayout;
 
     private final AHRS gyro;
-    private final PhotonCamera camera;
+    // private final PhotonCamera camera;
 
     public Swerve() {
 
@@ -51,10 +51,11 @@ public class Swerve extends SubsystemBase{
             } catch (Exception e) {}
         }).start();
 
-        camera = new PhotonCamera(Constants.IO.cameraName);
+        // camera = new PhotonCamera(Constants.IO.cameraName);
 
         pose = new Pose2d();
         odometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getRotation2d(), getModulePositions(), pose);
+        // correctedPose = new Pose2d(pose.getX() * -1, pose.getY(), pose.getRotation());
         field = new Field2d();
         SmartDashboard.putData(field);
         try {
@@ -72,6 +73,9 @@ public class Swerve extends SubsystemBase{
         }
 
         pose = odometry.update(getRotation2d(), getModulePositions());
+        // the odometry had the x inverted, and this is a quick and dirty solution
+        //TODO: find and fix the root cause
+        // correctedPose = new Pose2d(pose.getX() * -1, pose.getY(), pose.getRotation());
         field.setRobotPose(pose);
     }
 
@@ -85,8 +89,16 @@ public class Swerve extends SubsystemBase{
         }
     }
 
+    public void resetOdometry() {
+        odometry.resetPosition(getRotation2d(), getModulePositions(), pose);
+    }
+
+    public void setOdometry(Pose2d newPose) {
+        odometry.resetPosition(getRotation2d(), getModulePositions(), newPose);
+    }
+
     public double getHeading() {
-        return Math.IEEEremainder(gyro.getAngle(), 360);
+        return Math.IEEEremainder(-gyro.getAngle(), 360);
     }
 
     public Rotation2d getRotation2d() {

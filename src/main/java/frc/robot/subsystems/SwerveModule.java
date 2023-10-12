@@ -22,7 +22,8 @@ public class SwerveModule {
     private final CANSparkMax turnMotor;
 
     private final boolean[] isDriveInverted = {false, false, false, false};
-    private final boolean[] isTurnInverted  = {false, false, false, false};
+    // private final boolean[] isTurnInverted  = {false, false, false, false};
+    private final boolean[] isTurnInverted  = {true, true, true, true};
 
     private final CANCoder absoluteEncoder;
 
@@ -58,6 +59,7 @@ public class SwerveModule {
         System.out.println("Module " + moduleID + " turn motor configured");
 
         absoluteEncoder = new CANCoder(absoluteEncoderIDs[moduleID]);
+        absoluteEncoder.configSensorDirection(false);
 
         try {Thread.sleep(200);} catch (Exception e) {}
         driveEncoder = driveMotor.getEncoder();

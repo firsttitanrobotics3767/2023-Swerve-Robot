@@ -14,8 +14,9 @@ public class Constants {
         public static final int fieldOrientedButton = 7;
         public static final int robotOrientedButton = 5;
         public static final int boostButton = 8;
+        public static final int resetOdometryButton = 3;
 
-        public static final double deadband = 0.05;
+        public static final double deadband = 0.02;
 
         public static final double throttleLimiter = 0.6;
         public static final double turnThrottleLimiter = 0.6;
@@ -37,10 +38,10 @@ public class Constants {
         public static final double trackWidth = Units.inchesToMeters(20.75);
         public static final double wheelBase = Units.inchesToMeters(20.75);
         public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
+            new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
             new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
-            new Translation2d(wheelBase / 2.0,  trackWidth / 2.0),
-            new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
+            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0),
+            new Translation2d(-wheelBase / 2.0, trackWidth / 2.0)
         );
 
         public static final class Module {
