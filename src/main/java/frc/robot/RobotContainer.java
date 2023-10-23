@@ -1,5 +1,11 @@
 package frc.robot;
 
+import java.util.List;
+
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -19,26 +25,33 @@ public class RobotContainer {
 
   private boolean robotOriented = false;
 
+  private PathConstraints constraints;
+  private PathPlannerTrajectory path;
+  // private List<PathPlannerTrajectory
+
   public RobotContainer() {
   
     swerve = new Swerve();
 
     driver = new CommandJoystick(Constants.IO.driverPort);
 
+    constraints = new PathConstraints(3, 10);
+    path = PathPlanner.loadPath("testPath", constraints);
+
     configureBindings();
 
-    swerve.setDefaultCommand(new SwerveJoystick(
-      () -> -driver.getRawAxis(IO.driveXAxis),
-      () -> -driver.getRawAxis(IO.driveYAxis),
-      () -> -driver.getRawAxis(IO.driveOmegaAxis),
-      this::isRobotOriented,
-      () -> driver.button(IO.boostButton).getAsBoolean(),
-      swerve
-      )
-    );
+    // swerve.setDefaultCommand(new SwerveJoystick(
+    //   () -> -driver.getRawAxis(IO.driveXAxis),
+    //   () -> -driver.getRawAxis(IO.driveYAxis),
+    //   () -> -driver.getRawAxis(IO.driveOmegaAxis),
+    //   this::isRobotOriented,
+    //   () -> driver.button(IO.boostButton).getAsBoolean(),
+    //   swerve
+    //   )
+    // );
 
     //TESTING
-    // swerve.setDefaultCommand(new RunCommand(() -> {swerve.setDriveSpeeds(-driver.getRawAxis(1)); swerve.setTurnSpeeds(driver.getRawAxis(2));}, swerve));
+    swerve.setDefaultCommand(new RunCommand(() -> {swerve.setDriveSpeeds(-driver.getRawAxis(1)); swerve.setTurnSpeeds(driver.getRawAxis(2));}, swerve));
   }
 
   private void configureBindings() {
@@ -50,8 +63,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    // return Commands.print("No autonomous command configured");
-    return new SwerveJoystick(() -> 0.0, () -> 0.07, () -> 0.0, () -> false, () -> false, swerve).withTimeout(1);
+    return swerve.getTrajectoryCommand(path, robotOriented);
   }
 
   public boolean isRobotOriented() {

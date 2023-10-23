@@ -16,7 +16,7 @@ import frc.robot.utils.Constants;
 
 public class SwerveModule {
 
-    private final int moduleID;
+    public final int moduleID;
     
     private final CANSparkMax driveMotor;
     private final CANSparkMax turnMotor;
@@ -158,9 +158,9 @@ public class SwerveModule {
     public void setDriveSpeed(double speed) {
         // driveMotor.set(speed);
         speed = speed * Constants.Swerve.maxSpeed;
-        if (speed < 0.05 && speed > -0.05) {
-            return;
-        }
+        // if (speed < 0.05 && speed > -0.05) {
+        //     return;
+        // }
         driveController.setReference(speed, ControlType.kVelocity);
         SmartDashboard.putNumber("Drive speed setpoint", speed);
 
@@ -171,6 +171,10 @@ public class SwerveModule {
         position = position * Math.PI;
         turnController.setReference(position, ControlType.kPosition);
         SmartDashboard.putNumber("Turn Position Setpoint", positionDegrees);
+    }
+
+    public void setTurnSpeed(double speed) {
+        turnMotor.set(speed);
     }
     
 }
