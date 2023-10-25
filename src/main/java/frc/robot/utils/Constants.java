@@ -16,7 +16,7 @@ public class Constants {
         public static final int boostButton = 8;
         public static final int resetOdometryButton = 3;
 
-        public static final double deadband = 0.02;
+        public static final double deadband = 0.03;
 
         public static final double throttleLimiter = 0.6;
         public static final double turnThrottleLimiter = 0.6;

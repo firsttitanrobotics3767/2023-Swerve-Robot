@@ -138,6 +138,8 @@ public class SwerveModule {
         turnController.setReference(state.angle.getRadians(), ControlType.kPosition);
         SmartDashboard.putString("Module [" + getModuleID() + "] desired state",
             String.format("Speed: %.2f m/s, Angle: %.2f", state.speedMetersPerSecond, state.angle.getDegrees()));
+        SmartDashboard.putNumber("TargetSpeed", state.speedMetersPerSecond);
+        // SmartDashboard.putNumber("ActualSpeed", getState().speedMetersPerSecond);
         
     }
 

@@ -35,23 +35,23 @@ public class RobotContainer {
 
     driver = new CommandJoystick(Constants.IO.driverPort);
 
-    constraints = new PathConstraints(3, 10);
+    constraints = new PathConstraints(1, 2);
     path = PathPlanner.loadPath("testPath", constraints);
 
     configureBindings();
 
-    // swerve.setDefaultCommand(new SwerveJoystick(
-    //   () -> -driver.getRawAxis(IO.driveXAxis),
-    //   () -> -driver.getRawAxis(IO.driveYAxis),
-    //   () -> -driver.getRawAxis(IO.driveOmegaAxis),
-    //   this::isRobotOriented,
-    //   () -> driver.button(IO.boostButton).getAsBoolean(),
-    //   swerve
-    //   )
-    // );
+    swerve.setDefaultCommand(new SwerveJoystick(
+      () -> -driver.getRawAxis(IO.driveXAxis),
+      () -> -driver.getRawAxis(IO.driveYAxis),
+      () -> -driver.getRawAxis(IO.driveOmegaAxis),
+      this::isRobotOriented,
+      () -> driver.button(IO.boostButton).getAsBoolean(),
+      swerve
+      )
+    );
 
     //TESTING
-    swerve.setDefaultCommand(new RunCommand(() -> {swerve.setDriveSpeeds(-driver.getRawAxis(1)); swerve.setTurnSpeeds(driver.getRawAxis(2));}, swerve));
+    // swerve.setDefaultCommand(new RunCommand(() -> {swerve.setDriveSpeeds(-driver.getRawAxis(1)); swerve.setTurnSpeeds(driver.getRawAxis(2));}, swerve));
   }
 
   private void configureBindings() {

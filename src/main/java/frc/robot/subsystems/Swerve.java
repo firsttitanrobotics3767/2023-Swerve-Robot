@@ -79,6 +79,7 @@ public class Swerve extends SubsystemBase{
         pose = odometry.update(getRotation2d(), getModulePositions());
         field.setRobotPose(pose);
         SmartDashboard.putNumber("vOmega", getChassisSpeeds().omegaRadiansPerSecond);
+        SmartDashboard.putNumber("ActualSpeed", modules[0].getState().speedMetersPerSecond);
     }
 
     public void resetGyro() {
@@ -104,7 +105,7 @@ public class Swerve extends SubsystemBase{
     }
 
     public Rotation2d getRotation2d() {
-        return Rotation2d.fromDegrees(gyro.getYaw());
+        return Rotation2d.fromDegrees(-gyro.getAngle());
     }
 
     public Pose2d getPose() {
@@ -158,9 +159,9 @@ public class Swerve extends SubsystemBase{
             traj,
             this::getPose,
             Constants.Swerve.swerveKinematics,
-            new PIDController(1.8, 0, 0),
-            new PIDController(1.8, 0, 0),
             new PIDController(1, 0, 0),
+            new PIDController(0, 0, 0),
+            new PIDController(0, 0, 0),
             this::setModuleStates,
             true,
             this
