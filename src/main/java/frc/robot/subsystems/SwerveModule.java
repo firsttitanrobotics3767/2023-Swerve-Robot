@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
@@ -25,7 +25,7 @@ public class SwerveModule {
     // private final boolean[] isTurnInverted  = {false, false, false, false};
     private final boolean[] isTurnInverted  = {true, true, true, true};
 
-    private final CANCoder absoluteEncoder;
+    private final CANcoder absoluteEncoder;
 
     private final RelativeEncoder driveEncoder;
     private final RelativeEncoder turnEncoder;
@@ -46,7 +46,7 @@ public class SwerveModule {
         driveMotor.restoreFactoryDefaults();
         driveMotor.clearFaults();
         driveMotor.setInverted(isDriveInverted[moduleID]);
-        driveMotor.setIdleMode(IdleMode.kCoast);
+        driveMotor.setIdleMode(IdleMode.kBrake);
         driveMotor.burnFlash();
         System.out.println("Module " + moduleID + " drive motor configured");
 
@@ -58,8 +58,8 @@ public class SwerveModule {
         turnMotor.burnFlash();
         System.out.println("Module " + moduleID + " turn motor configured");
 
-        absoluteEncoder = new CANCoder(absoluteEncoderIDs[moduleID]);
-        absoluteEncoder.configSensorDirection(false);
+        absoluteEncoder = new CANcoder(absoluteEncoderIDs[moduleID]);
+        
 
         try {Thread.sleep(200);} catch (Exception e) {}
         driveEncoder = driveMotor.getEncoder();
@@ -111,7 +111,7 @@ public class SwerveModule {
     }
 
     public double getAbsoluteEncoderPosition() {
-        return absoluteEncoder.getAbsolutePosition();
+        return absoluteEncoder.getAbsolutePosition().getValue();
     }
 
     public void resetEncoders() {
@@ -139,7 +139,7 @@ public class SwerveModule {
         SmartDashboard.putString("Module [" + getModuleID() + "] desired state",
             String.format("Speed: %.2f m/s, Angle: %.2f", state.speedMetersPerSecond, state.angle.getDegrees()));
         SmartDashboard.putNumber("TargetSpeed", state.speedMetersPerSecond);
-        // SmartDashboard.putNumber("ActualSpeed", getState().speedMetersPerSecond);
+        SmartDashboard.putNumber("ActualSpeed", getState().speedMetersPerSecond);
         
     }
 

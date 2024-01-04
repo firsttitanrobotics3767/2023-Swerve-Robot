@@ -12,7 +12,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import frc.robot.commands.SupplyElevator;
 import frc.robot.commands.SwerveJoystick;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Swerve;
 import frc.robot.utils.Constants;
 import frc.robot.utils.Constants.IO;
@@ -20,6 +22,7 @@ import frc.robot.utils.Constants.IO;
 public class RobotContainer {
 
   private final Swerve swerve;
+  private final Elevator elevator;
 
   private final CommandJoystick driver;
 
@@ -32,10 +35,11 @@ public class RobotContainer {
   public RobotContainer() {
   
     swerve = new Swerve();
+    elevator = new Elevator();
 
     driver = new CommandJoystick(Constants.IO.driverPort);
 
-    constraints = new PathConstraints(1, 2);
+    constraints = new PathConstraints(2, 10);
     path = PathPlanner.loadPath("testPath", constraints);
 
     configureBindings();
@@ -50,6 +54,7 @@ public class RobotContainer {
       )
     );
 
+
     //TESTING
     // swerve.setDefaultCommand(new RunCommand(() -> {swerve.setDriveSpeeds(-driver.getRawAxis(1)); swerve.setTurnSpeeds(driver.getRawAxis(2));}, swerve));
   }
@@ -60,6 +65,12 @@ public class RobotContainer {
     driver.button(IO.robotOrientedButton).onTrue(new InstantCommand(() -> robotOriented = true));
     driver.button(IO.fieldOrientedButton).onTrue(new InstantCommand(() -> robotOriented = false));
     driver.button(IO.resetOdometryButton).onTrue(new InstantCommand(() -> swerve.setOdometry(new Pose2d())));
+
+    // driver.button(2).whileTrue(new SupplyElevator(() -> 0.2, elevator));
+    // driver.button(5).whileTrue(new SupplyElevator(() -> 0.2, elevator));
+    driver.povDown().whileTrue(new SupplyElevator(() -> -0.4, elevator));
+    driver.povUp().whileTrue(new SupplyElevator(() -> 0.4, elevator));
+    driver.povCenter().whileTrue(new SupplyElevator(() -> 0.0, elevator));
   }
 
   public Command getAutonomousCommand() {
